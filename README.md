@@ -1,22 +1,29 @@
-# Headhunter - AI Chat Agent
+# Headhunter - Career Guidance Agent
 
-A conversational AI agent built with LangChain and LangGraph, powered by a local LLM via LM Studio. The agent can chat, perform calculations, and answer questions from your own documents (RAG).
+A multi-agent AI system built with LangChain and LangGraph that helps you explore your career history and research new directions. Powered by a local LLM via LM Studio (or optionally Anthropic/OpenAI).
+
+## How it works
+
+An **Orchestrator** classifies each message and routes it to one of two agents:
+
+- **Discovery Agent** — reflects on your background, work history, skills, and experiences using your personal documents
+- **Research Agent** — searches both your documents and the web (via Tavily) for job market data, salary ranges, career paths, and industry trends
 
 ## Prerequisites
 
 - **Python 3.10+**
 - **LM Studio** running locally on port 1234 with the following models loaded:
-  - `gemma-4-E4B-it` (chat model)
+  - `google/gemma-4-12b-qat` (chat model)
   - `text-embedding-nomic-embed-text-v1.5` (embedding model)
-- **Docker Desktop** (optional, for running in a container)
+- **Tavily API key** — free tier available at tavily.com — required for web search
 
 ## Setup
 
 ### 1. Create and activate a virtual environment
 
 ```bash
-python3 -m venv venv
-source venv/bin/activate
+python -m venv venv
+source venv/bin/activate   # Windows: venv\Scripts\activate
 ```
 
 ### 2. Install dependencies
@@ -25,13 +32,39 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 3. Add documents
+### 3. Configure environment variables
 
-Place `.pdf` or `.txt` files in the `knowledge/` folder. The agent will load and index them on startup.
+Create a `.env` file in the project root:
+
+```
+TAVILY_API_KEY=your_tavily_api_key_here
+```
+
+Optional overrides:
+
+```
+LLM_PROVIDER=lmstudio        # or: anthropic, openai
+LLM_MODEL=google/gemma-4-12b-qat     # model name for the chosen provider
+LM_STUDIO_HOST=127.0.0.1     # hostname where LM Studio is running
+ANTHROPIC_API_KEY=...         # required if LLM_PROVIDER=anthropic
+OPENAI_API_KEY=...            # required if LLM_PROVIDER=openai
+```
+
+### 4. Add your documents
+
+Place `.pdf`, `.txt`, or `.md` files directly in the `knowledge/` folder. The agent will load and index them on startup.
+
+## Starting LM Studio
+
+1. Open **LM Studio** and go to the **Developer** tab (`<->` icon in the left sidebar)
+2. Click **Start Server** — it should show `Server running on port 1234`
+3. Under **Loaded Models**, load both:
+   - `google/gemma-4-12b-qat`
+   - `text-embedding-nomic-embed-text-v1.5`
 
 ## Running locally
 
-Make sure LM Studio is running, then:
+With LM Studio running and both models loaded:
 
 ```bash
 python main.py
@@ -48,17 +81,14 @@ docker build -t headhunter .
 ### Run the container
 
 ```bash
-docker run -it -e LM_STUDIO_HOST=host.docker.internal headhunter
+docker run -it \
+  -e LM_STUDIO_HOST=host.docker.internal \
+  -e TAVILY_API_KEY=your_key_here \
+  headhunter
 ```
 
-- `-it` enables interactive mode so you can chat
-- `-e LM_STUDIO_HOST=host.docker.internal` allows the container to reach LM Studio on your Mac
-
-### Verify the container is running
-
-```bash
-docker ps
-```
+- `-it` enables interactive mode
+- `LM_STUDIO_HOST=host.docker.internal` allows the container to reach LM Studio on your host machine
 
 ### Stop the container
 
@@ -66,7 +96,8 @@ Type `quit`, `exit`, or `q` at the `You:` prompt, or press `Ctrl+C`.
 
 ## Features
 
-- **General chat** - talk about any topic
-- **Calculator** - add, subtract, multiply, divide (e.g. "What is 6 times 7, plus 10?")
-- **Document search (RAG)** - ask questions about documents in the `knowledge/` folder
-- **Chat history** - remembers conversation context within a session
+- **Career discovery** — reflects on your work history, skills, and experiences from your personal documents
+- **Job market research** — searches the web for roles, salaries, and industry trends
+- **Document knowledge base (RAG)** — indexes resumes, performance reviews, and other `.pdf`/`.txt`/`.md` files
+- **Conversational memory** — remembers context within a session
+- **Multiple LLM providers** — LM Studio (default), Anthropic, or OpenAI via environment variables

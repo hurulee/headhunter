@@ -19,17 +19,15 @@ def load_knowledge_base(base_url: str, knowledge_dir: str):
 
     print("Loading knowledge base...")
     docs = []
-    for filename in os.listdir(knowledge_dir):
-        filepath = os.path.join(knowledge_dir, filename)
-        if filename.endswith(".pdf"):
-            loader = PyPDFLoader(filepath)
-            docs.extend(loader.load())
-        elif filename.endswith(".txt"):
-            loader = TextLoader(filepath)
-            docs.extend(loader.load())
-        elif filename.endswith(".md"):
-            loader = TextLoader(filepath)
-            docs.extend(loader.load())
+    for dirpath, _, filenames in os.walk(knowledge_dir):
+        for filename in filenames:
+            filepath = os.path.join(dirpath, filename)
+            if filename.endswith(".pdf"):
+                loader = PyPDFLoader(filepath)
+                docs.extend(loader.load())
+            elif filename.endswith((".txt", ".md")):
+                loader = TextLoader(filepath)
+                docs.extend(loader.load())
 
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
     splits = text_splitter.split_documents(docs)
