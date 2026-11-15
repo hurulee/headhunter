@@ -52,7 +52,15 @@ OPENAI_API_KEY=...            # required if LLM_PROVIDER=openai
 
 ### 4. Add your documents
 
-Place `.pdf`, `.txt`, or `.md` files directly in the `knowledge/` folder. The agent will load and index them on startup.
+The `knowledge/` folder is **not included in this repository** — it's gitignored so that personal documents are never committed or pushed. You need to create it yourself and add your own files:
+
+```bash
+mkdir knowledge
+```
+
+Then place your `.pdf`, `.txt`, or `.md` files directly in the `knowledge/` folder (subfolders are supported too). The agent will load and index everything in it on startup. Typical documents include your resume, performance reviews, and notes about past projects.
+
+> **Note:** Anything you put in `knowledge/` stays local — it's excluded from version control, so it won't be pushed to the remote.
 
 ## Starting LM Studio
 
@@ -98,6 +106,6 @@ Type `quit`, `exit`, or `q` at the `You:` prompt, or press `Ctrl+C`.
 
 - **Career discovery** — reflects on your work history, skills, and experiences from your personal documents
 - **Job market research** — searches the web for roles, salaries, and industry trends
-- **Document knowledge base (RAG)** — indexes resumes, performance reviews, and other `.pdf`/`.txt`/`.md` files
+- **Document knowledge base (RAG)** — indexes resumes, performance reviews, and other `.pdf`/`.txt`/`.md` files you add to a local, gitignored `knowledge/` folder
 - **Conversational memory** — remembers context within a session
 - **Multiple LLM providers** — LM Studio (default), Anthropic, or OpenAI via environment variables
